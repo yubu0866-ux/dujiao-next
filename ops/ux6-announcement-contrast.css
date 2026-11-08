@@ -1,0 +1,35 @@
+/* Append to the served /__bundle.css (section __ux6.css). Do not replace the bundle.
+   Live rule uses color:inherit on a pale gradient; dark theme text is light, so the bar is unreadable.
+   html.dark is the storefront theme class. */
+.ux6-ann,
+.ux6-ann.info,
+.ux6-ann.warn,
+.ux6-ann.ok {
+  color: #1e293b;
+}
+.ux6-ann {
+  background: linear-gradient(90deg, #e8eefc, #eee9ff);
+}
+.dark .ux6-ann,
+.dark .ux6-ann.info,
+.dark .ux6-ann.warn,
+.dark .ux6-ann.ok {
+  color: #f8fafc;
+}
+.dark .ux6-ann,
+.dark .ux6-ann.info {
+  background: #1e3a5f;
+  border-color: rgba(147, 197, 253, 0.45);
+}
+.dark .ux6-ann.warn {
+  background: #3f2e12;
+  border-color: rgba(251, 191, 36, 0.5);
+}
+.dark .ux6-ann.ok {
+  background: #064e3b;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+.ux6-ann a,
+.ux6-ann .x {
+  color: inherit;
+}
