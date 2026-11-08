@@ -53,11 +53,14 @@
       <button
         v-if="!soldOut"
         type="button"
-        class="grid h-9 w-9 flex-none place-items-center rounded-full bg-primary text-white transition hover:bg-primary/90"
-        :aria-label="t('products.quickBuyAria')"
+        class="inline-flex h-9 flex-none items-center justify-center gap-1 rounded-full bg-primary font-bold text-white transition hover:bg-primary/90"
+        :class="showLoginCta ? 'px-3 text-[11px]' : 'w-9'"
+        :aria-label="showLoginCta ? t('quickBuy.loginToBuy') : t('products.quickBuyAria')"
         @click.prevent.stop="$emit('quickBuy', product)"
       >
-        <ShoppingCart class="h-4 w-4" />
+        <LogIn v-if="showLoginCta" class="h-3.5 w-3.5" />
+        <ShoppingCart v-else class="h-4 w-4" />
+        <span v-if="showLoginCta">{{ t('quickBuy.loginToBuy') }}</span>
       </button>
       <ChevronRight class="hidden h-4 w-4 flex-none text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
     </div>
@@ -67,15 +70,18 @@
 <script setup lang="ts">
 import { computed, ref, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { AlarmClock, ChevronRight, Lock, Package, Pencil, ShoppingCart, UserPlus, XCircle, Zap } from 'lucide-vue-next'
+import { AlarmClock, ChevronRight, Lock, LogIn, Package, Pencil, ShoppingCart, UserPlus, XCircle, Zap } from 'lucide-vue-next'
 import { getFirstImageUrl, getImageUrl } from '../../../utils/image'
 import { useLocalized, useProductLabels } from '../../../composables/useProduct'
+import { useUserAuthStore } from '../../../stores/userAuth'
+import { productRequiresMemberLogin } from '../../../utils/purchaseAccess'
 
 const props = withDefaults(defineProps<{ product: any; index?: number }>(), { index: 0 })
 
 defineEmits<{ quickBuy: [product: any] }>()
 
 const { t } = useI18n()
+const userAuthStore = useUserAuthStore()
 const { getLocalizedText, siteCurrency, formatPrice } = useLocalized()
 const {
   getStockStatusLabel, getPurchaseTypeLabel, getFulfillmentTypeLabel,
@@ -94,6 +100,7 @@ const coverClass = computed(() => covers[(props.index ?? 0) % covers.length])
 const title = computed(() => getLocalizedText(props.product?.title))
 const categoryName = computed(() => getLocalizedText(props.product?.category?.name))
 const soldOut = computed(() => isSoldOut(props.product))
+const showLoginCta = computed(() => productRequiresMemberLogin(props.product, userAuthStore.isAuthenticated) && !soldOut.value)
 const promo = computed(() => hasPromotionPrice(props.product))
 
 const imageErrored = ref(false)

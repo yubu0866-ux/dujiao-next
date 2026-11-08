@@ -700,3 +700,9 @@ html[data-telegram-mini-app="true"] body {
 .theme-prose p:has(> img) + p:has(> img) > img {
   margin-top: 0;
 }
+
+/* 公告正文默认跟主题走。对比度足够的商家颜色仍由 inline style 覆盖。 */
+.announcement-rich.prose {
+  color: var(--ui-text-primary);
+  background-color: transparent;
+}
