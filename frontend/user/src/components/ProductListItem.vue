@@ -93,16 +93,19 @@
         </div>
       </div>
 
-      <!-- Quick buy cart icon -->
       <Button
         type="button"
-        variant="outline"
-        size="icon"
-        class="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0"
+        :variant="showLoginCta ? 'default' : 'outline'"
+        :size="showLoginCta ? 'sm' : 'icon'"
+        class="flex-shrink-0"
+        :class="showLoginCta ? 'h-7 px-2 text-[11px] font-semibold sm:h-8' : 'w-7 h-7 sm:w-8 sm:h-8'"
+        :aria-label="showLoginCta ? t('quickBuy.loginToBuy') : t('products.quickBuyAria')"
         :disabled="isSoldOut(product)"
         @click.stop="$emit('quickBuy', product)"
       >
-        <ShoppingCart class="h-4 w-4" />
+        <LogIn v-if="showLoginCta" class="h-3.5 w-3.5" />
+        <ShoppingCart v-else class="h-4 w-4" />
+        <span v-if="showLoginCta">{{ t('quickBuy.loginToBuy') }}</span>
       </Button>
 
       <!-- Arrow -->
@@ -113,15 +116,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ChevronRight, Image as ImageIcon, ShoppingCart } from 'lucide-vue-next'
+import { ChevronRight, Image as ImageIcon, LogIn, ShoppingCart } from 'lucide-vue-next'
 import { getFirstImageUrl, getImageUrl } from '../utils/image'
 import { useLocalized, useProductLabels } from '../composables/useProduct'
+import { useUserAuthStore } from '../stores/userAuth'
+import { productRequiresMemberLogin } from '../utils/purchaseAccess'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   product: any
   index?: number
   animationStep?: number
@@ -136,6 +142,8 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
+const userAuthStore = useUserAuthStore()
 const { getLocalizedText, siteCurrency, formatPrice } = useLocalized()
 const { getPurchaseTypeLabel, getFulfillmentTypeLabel, getStockBadgeVariant, getStockStatusLabel, isSoldOut, hasPromotionPrice, getPromotionPriceAmount, hasPromotionRules, hasWholesalePrices } = useProductLabels()
+const showLoginCta = computed(() => productRequiresMemberLogin(props.product, userAuthStore.isAuthenticated) && !isSoldOut(props.product))
 </script>

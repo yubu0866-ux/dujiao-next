@@ -133,17 +133,19 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Quick buy cart button -->
+          <!-- 未登录的会员商品直接标出登录要求；游客可购和已登录仍走快速购买。 -->
           <Button
             type="button"
-            variant="outline"
-            size="icon"
-            class="w-8 h-8 md:w-9 md:h-9"
-            :aria-label="t('products.quickBuyAria')"
+            :variant="showLoginCta ? 'default' : 'outline'"
+            :size="showLoginCta ? 'sm' : 'icon'"
+            :class="showLoginCta ? 'h-8 px-2.5 text-[11px] font-semibold' : 'w-8 h-8 md:w-9 md:h-9'"
+            :aria-label="showLoginCta ? t('quickBuy.loginToBuy') : t('products.quickBuyAria')"
             :disabled="isSoldOut(product)"
             @click.stop="$emit('quickBuy', product)"
           >
-            <ShoppingCart class="h-4 w-4" />
+            <LogIn v-if="showLoginCta" class="h-3.5 w-3.5" />
+            <ShoppingCart v-else class="h-4 w-4" />
+            <span v-if="showLoginCta">{{ t('quickBuy.loginToBuy') }}</span>
           </Button>
           <!-- Desktop: view details -->
           <span
@@ -164,9 +166,11 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { computed, ref, watch } from 'vue'
-import { ArrowRight, ChevronRight, Image as ImageIcon, Lock, Pencil, ShoppingCart, UserPlus, Zap } from 'lucide-vue-next'
+import { ArrowRight, ChevronRight, Image as ImageIcon, Lock, LogIn, Pencil, ShoppingCart, UserPlus, Zap } from 'lucide-vue-next'
 import { getFirstImageUrl, getImageUrl } from '../utils/image'
 import { useLocalized, useProductLabels } from '../composables/useProduct'
+import { useUserAuthStore } from '../stores/userAuth'
+import { productRequiresMemberLogin } from '../utils/purchaseAccess'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -188,8 +192,10 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
+const userAuthStore = useUserAuthStore()
 const { getLocalizedText, siteCurrency, formatPrice } = useLocalized()
 const { getPurchaseTypeLabel, getFulfillmentTypeLabel, getStockBadgeVariant, getStockStatusLabel, isSoldOut, hasPromotionPrice, getPromotionPriceAmount, hasPromotionRules, hasWholesalePrices } = useProductLabels()
+const showLoginCta = computed(() => productRequiresMemberLogin(props.product, userAuthStore.isAuthenticated) && !isSoldOut(props.product))
 
 const imageErrored = ref(false)
 const attemptIdx = ref(0)
